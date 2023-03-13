@@ -1,6 +1,6 @@
 import { Schema, model } from 'mongoose';
 import bcrypt from 'bcrypt';
-import { generateToken } from '../helpers/generateToken';
+import { generateToken } from '../helpers';
 import { User } from '../types';
 
 const userModel = new Schema<User>({
@@ -33,7 +33,7 @@ const userModel = new Schema<User>({
     type: Boolean,
     default: false,
   }
-}, { timestamps: true });
+}, { timestamps: true })
 
 userModel.pre('save', function ( this: User, next ) {
   if ( !this.isModified( 'password ') ) return next();
