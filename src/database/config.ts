@@ -4,7 +4,8 @@ export const dbConnect = async (): Promise<void> => {
   set( 'strictQuery', false );
   
   try {
-    const db = await connect( process.env.MONGO_URI!, {
+    const mongoUri: string = process.env.MONGO_URI || '';
+    const db = await connect( mongoUri, {
       useNewUrlParser: true,
       useUnifiedTopology: true,
     } as ConnectOptions );

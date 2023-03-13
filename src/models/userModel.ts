@@ -1,9 +1,8 @@
 import { Schema, model } from 'mongoose';
-import bcrypt from 'bcrypt';
 import { generateToken } from '../helpers';
 import { User } from '../types';
 
-const userModel = new Schema<User>({
+const userSchema = new Schema<User>({
   name: {
     type: String,
     required: true,
@@ -35,16 +34,4 @@ const userModel = new Schema<User>({
   }
 }, { timestamps: true })
 
-userModel.pre('save', function ( this: User, next ) {
-  if ( !this.isModified( 'password ') ) return next();
-
-  const salt = bcrypt.genSaltSync( 10 );
-  this.password = bcrypt.hashSync( this.password, salt );
-  next();
-})
-
-userModel.methods.comparePassword = function ( this: User, password: string ) {
-  return bcrypt.compareSync( password, this.password );
-}
-
-export default model<User>( 'User', userModel );
+export default model<User>( 'User', userSchema );

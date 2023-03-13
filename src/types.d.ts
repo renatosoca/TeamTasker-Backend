@@ -1,21 +1,18 @@
 import { Request } from 'express';
-import { Document, ObjectId } from 'mongoose';
+import { ObjectId } from 'mongoose';
 
-export interface User extends Document {
-  _id: ObjectId,
-  name: string;
-  lastname: string,
+export interface Auth {
   email: string;
   password: string;
+}
+export interface User extends Auth {
+  _id: ObjectId | string,
+  name: string;
+  lastname: string,
   token: string;
   confirmed: boolean;
-  comparePassword: ( password: string) => boolean;
 }
 
-export interface jwtPayload {
-  _id: ObjectId;
-  name: string;
-}
 
 export interface UserRequest extends Request {
   user?: User;

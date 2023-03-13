@@ -1,9 +1,9 @@
 import { Response, Request } from 'express';
 import { userModel } from '../models';
-import { AuthRequest, AuthResponse, MessageResponse } from '../types';
-import { generateToken, generateJWT } from '../helpers';
+//import { AuthRequest } from '../types';
+import { errorHttp, generateToken } from '../helpers';
 
-const authUser = async ( req: Request, res: Response ): Promise< Response<AuthResponse | MessageResponse> >  => {
+/* const authUser = async ( req: Request, res: Response )  => {
   const { email, password } = req.body;
 
   try {
@@ -30,9 +30,9 @@ const authUser = async ( req: Request, res: Response ): Promise< Response<AuthRe
       msg: 'Ocurrio un problema, comuniquese con el administrador' 
     });
   }
-}
+} */
 
-const registerUser = async ( req: Request, res: Response ): Promise< Response<MessageResponse> > => {
+/* const registerUser = async ( req: Request, res: Response ) => {
   const { email } = req.body;
 
   try {
@@ -54,10 +54,10 @@ const registerUser = async ( req: Request, res: Response ): Promise< Response<Me
       msg: 'Ocurrio un problema, comuniquese con el administrador' 
     });
   }
-}
+} */
 
 //Pruebas faltan
-const confirmAccount = async ( req: Request, res: Response ): Promise< Response<MessageResponse> > => {
+const confirmAccount = async ( req: Request, res: Response ) => {
   const { token } = req.params;
 
   try {
@@ -74,14 +74,11 @@ const confirmAccount = async ( req: Request, res: Response ): Promise< Response<
       msg: 'Cuenta confirmada correctamente'
     })
   } catch (error) {
-    return res.status(500).json({
-      ok: false,
-      msg: 'Error del sistema, comuniquese con el administrador'
-    })
+    return errorHttp( res, 'Error del sistema, comuniquese con el administrador' );
   }
 }
 
-const forgotPassword = async ( req: Request, res: Response ): Promise< Response<MessageResponse> > => {
+const forgotPassword = async ( req: Request, res: Response ) => {
   const { email } = req.body;
 
   try {
@@ -100,30 +97,27 @@ const forgotPassword = async ( req: Request, res: Response ): Promise< Response<
     })
 
   } catch (error) {
-    return res.status(500).json({
-      ok: false,
-      msg: 'Error del sistema, comuniquese con el administrador'
-    })
+    return errorHttp( res, 'Error del sistema, comuniquese con el administrador' );
   }
 }
 
-const resetPassword = async ( _req: Request, res: Response ): Promise<void> => {
+const resetPassword = async ( _req: Request, res: Response ) => {
   res.status(200).json( { message: 'resetPassword' } );
 }
 
-const userProfile = async ( _req: Request, res: Response ): Promise<void> => {
+const userProfile = async ( _req: Request, res: Response ) => {
   res.status(200).json( { message: 'profileUser' } );
 }
 
-const updateUserProfile = async ( _req: Request, res: Response ): Promise<void> => {
+const updateUserProfile = async ( _req: Request, res: Response ) => {
   res.status(200).json( { message: 'updateUserProfile' } );
 }
 
-const updateUserPassword = async ( _req: Request, res: Response ): Promise<void> => {
+const updateUserPassword = async ( _req: Request, res: Response ) => {
   res.status(200).json( { message: 'updateUserPassword' } );
 }
 
-const revalidateJWT = async ( req: AuthRequest, res: Response ): Promise< Response<AuthResponse | MessageResponse> > => {
+/* const revalidateJWT = async ( req: AuthRequest, res: Response ) => {
   try {
     const { _id, name, lastname, email } = req.user;
     return res.status(200).json({
@@ -137,16 +131,16 @@ const revalidateJWT = async ( req: AuthRequest, res: Response ): Promise< Respon
   } catch (error) {
     return res.status(500).json({ ok: false, msg: 'Error del sistema, comuniquese con el administrador'})
   }
-}
+} */
 
 export {
-  authUser,
-  registerUser,
+  //authUser,
+  //registerUser,
   confirmAccount,
   forgotPassword,
   resetPassword,
   userProfile,
   updateUserProfile,
   updateUserPassword,
-  revalidateJWT
+  //revalidateJWT
 }
