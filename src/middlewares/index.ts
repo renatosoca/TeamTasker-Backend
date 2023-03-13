@@ -1,1 +1,1 @@
-export * from './JwtValidation';
+export * from './checkSesion';

@@ -1,4 +1,4 @@
-
+export * from './bcrypt.handle';
 export * from './error.handle';
-export * from './generateJWT';
-export * from './generateToken';
+export * from './token.handle';
+export * from './jwt.handle';

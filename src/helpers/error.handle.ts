@@ -1,5 +1,5 @@
 import { Response } from 'express';
 
 export const errorHttp = ( res: Response, msg: string) => {
-  res.status(500).json({ ok: false, msg });
+  return res.status(500).json({ ok: false, msg });
 }

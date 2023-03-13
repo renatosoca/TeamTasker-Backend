@@ -1,6 +1,6 @@
 import { Schema, model } from 'mongoose';
 import { generateToken } from '../helpers';
-import { User } from '../types';
+import { User } from '../interfaces';
 
 const userSchema = new Schema<User>({
   name: {
@@ -32,6 +32,6 @@ const userSchema = new Schema<User>({
     type: Boolean,
     default: false,
   }
-}, { timestamps: true })
+}, { timestamps: true, versionKey: false });
 
 export default model<User>( 'User', userSchema );
