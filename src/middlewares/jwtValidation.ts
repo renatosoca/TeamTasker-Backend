@@ -1,6 +1,6 @@
 import { Response, NextFunction } from 'express';
-import { userModel } from '../models';
 import jwt from 'jsonwebtoken';
+import { userModel } from '../models';
 import { UserRequest } from '../types';
 
 export const jwtValidation = async ( req: UserRequest, res: Response, next: NextFunction ) => {
