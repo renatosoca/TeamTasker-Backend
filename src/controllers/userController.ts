@@ -1,9 +1,9 @@
 import { Response, Request } from 'express';
 import { userModel } from '../models';
 import { generateJWT } from '../helpers/generateJWT';
-//import { AuthRequest } from '../types';
+import { AuthRequest, AuthResponse, MessageResponse } from '../types';
 
-const authUser = async ( req: Request, res: Response ) => {
+const authUser = async ( req: Request, res: Response ): Promise< Response<AuthResponse | MessageResponse> >  => {
   const { email, password } = req.body;
 
   try {
@@ -29,7 +29,7 @@ const authUser = async ( req: Request, res: Response ) => {
   }
 }
 
-const registerUser = async ( req: Request, res: Response ) => {
+const registerUser = async ( req: Request, res: Response ): Promise< Response<MessageResponse> > => {
   const { email } = req.body;
 
   try {
@@ -69,15 +69,20 @@ const updateUserPassword = async ( _req: Request, res: Response ): Promise<void>
   res.status(200).json( { message: 'updateUserPassword' } );
 }
 
-const revalidateJWT = async ( _req: Request, _res: Response ) => {
-  /* const { _id, name, lastname, email } = req.user;
-  return res.status(200).json({
-    _id,
-    name,
-    lastname,
-    email,
-    jwt: generateJWT({ _id, name }),
-  }) */
+const revalidateJWT = async ( req: AuthRequest, res: Response ): Promise< Response<AuthResponse | MessageResponse> > => {
+  try {
+    const { _id, name, lastname, email } = req.user;
+    return res.status(200).json({
+      ok: true,
+      _id,
+      name,
+      lastname,
+      email,
+      jwt: generateJWT({ _id, name }),
+    })
+  } catch (error) {
+    return res.status(500).json({ ok: false, msg: 'Error del sistema, comuniquese con el administrador'})
+  }
 }
 
 export {

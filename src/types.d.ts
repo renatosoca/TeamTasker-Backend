@@ -17,7 +17,7 @@ export interface jwtPayload {
   name: string;
 }
 
-export interface AuthRequestJwt extends Request {
+export interface UserRequest extends Request {
   user?: User;
 }
 
@@ -25,3 +25,15 @@ export interface AuthRequest extends Request {
   user: Pick<User, '_id' | 'name' | 'lastname' | 'email'>;
 }
 
+export interface MessageResponse {
+  ok: boolean;
+  msg?: string
+}
+
+export interface AuthResponse extends MessageResponse {
+  _id: ObjectId;
+  name: string;
+  lastname: string;
+  email: string;
+  jwt?: string;
+}

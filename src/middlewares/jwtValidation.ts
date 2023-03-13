@@ -1,9 +1,9 @@
 import { Response, NextFunction } from 'express';
 import { userModel } from '../models';
-import { AuthRequestJwt } from '../types';
 import jwt from 'jsonwebtoken';
+import { UserRequest } from '../types';
 
-export const jwtValidation = async ( req: AuthRequestJwt, res: Response, next: NextFunction ) => {
+export const jwtValidation = async ( req: UserRequest, res: Response, next: NextFunction ) => {
   const token: string | undefined = req.header('x-token');
   if ( !token ) return res.status(401).json({ ok: false, message: 'No token provided' });
 
