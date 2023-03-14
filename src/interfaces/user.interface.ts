@@ -1,8 +1,8 @@
 import { Request } from "express";
-import { ObjectId } from "mongoose";
+import { Document, ObjectId } from "mongoose";
 import { Auth } from "./";
 
-export interface User extends Auth {
+export interface User extends Document, Auth {
   _id: ObjectId | string,
   name: string;
   lastname: string,
