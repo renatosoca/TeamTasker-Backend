@@ -5,7 +5,7 @@ import { projectModel } from "../models"
 
 const getProjects = async ( { user }: UserResquestProvider, res: Response) => {
   try {
-    const projects = await projectModel.find({ owner: user?.id }).populate('owner', 'name lastname email');
+    const projects = await projectModel.find().where('owner').equals(user?._id).populate('owner', 'name lastname email').sort({ createdAt: -1 });
 
     return res.status(200).json({
       ok: true,
@@ -16,12 +16,14 @@ const getProjects = async ( { user }: UserResquestProvider, res: Response) => {
   }
 }
 
-const getProject = async ( { params }: Request, res: Response ) => {
+const getProject = async ( { params, user }: UserResquestProvider, res: Response ) => {
   const { id } = params;
 
   try {
     const project = await projectModel.findById( id );
-    if ( !project ) res.status(404).json({ ok: false, msg: 'No existe el proyecto' });
+    if ( !project ) return res.status(404).json({ ok: false, msg: 'No existe el proyecto' });
+
+    if ( project?.owner.toString() !== user?._id.toString() ) return res.status(403).json({ ok: false, msg: 'No autorizado' });
 
     return res.status(200).json({
       ok: true,
@@ -42,30 +44,59 @@ const createProject = async ( { body, user }: UserResquestProvider, res: Respons
     return res.status( 201 ).json({
       ok: false,
       project: newProject,
+      msg: 'Proyecto creado correctamente.'
     })
   } catch (error) {
     return errorHttp( res, 'Error al crear el proyecto');
   }
 }
 
-const updateProject = (_req: Request) => {
+const updateProject = async ( { params, body, user}: UserResquestProvider, res: Response ) => {
+  const { id } = params;
+
+  try {
+    const project = await projectModel.findById( id );
+    if ( !project ) return res.status(404).json({ ok: false, msg: 'No existe el proyecto' });
+
+    if ( project?.owner.toString() !== user?._id.toString() ) return res.status(403).json({ ok: false, msg: 'No autorizado' });
+    
+    const newProject = await projectModel.findByIdAndUpdate( id, { ...body }, { new: true } );
+    
+    return res.status(200).json({
+      ok: true,
+      project: newProject,
+      msg: 'Proyecto actualizado correctamente.'
+    })
+  } catch (error) {
+    return errorHttp( res, 'Error del sistema, comuniquese con el administrador');
+  }
+}
+
+const deleteProject = async ( { params, user }: UserResquestProvider, res: Response ) => {
+  const { id } = params;
+
+  try {
+    const project = await projectModel.findById( id );
+    if ( !project ) return res.status(404).json({ ok: false, msg: 'No existe el proyecto' });
+
+    if ( project?.owner.toString() !== user?._id.toString() ) return res.status(403).json({ ok: false, msg: 'No autorizado' });
+    
+    await project.deleteOne();
+    
+    return res.status(200).json({
+      ok: true,
+      msg: 'Proyecto eliminado correctamente.'
+    })
+  } catch (error) {
+    return errorHttp( res, 'Error del sistema, comuniquese con el administrador');
+  }
+}
+
+const addCollaborator = (_req: Request ) => {
 
 }
 
-const deleteProject = () => {
-
-}
-
-const addCollaborator = () => {
-
-}
-
-const deleteCollaborator = () => {
-
-}
-
-const getTasksProject = () => {
-
+const deleteCollaborator = (  ) => {
 }
 
 export {
@@ -76,5 +107,4 @@ export {
   deleteProject,
   addCollaborator,
   deleteCollaborator,
-  getTasksProject,
 }

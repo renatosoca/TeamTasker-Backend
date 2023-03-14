@@ -7,6 +7,6 @@ export interface Project extends Document {
   description: string,
   creationDate: Date;
   client: string;
-  owner: ObjectId | User;
-  colaborators: ( ObjectId | User )[];
+  owner: ObjectId | User | string;
+  colaborators: ( ObjectId | User | string )[];
 }

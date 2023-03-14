@@ -1,3 +1,3 @@
-export * from './index';
-export * from './userController';
 export * from './projectController';
+export * from './taskController';
+export * from './userController';

@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { addCollaborator, createProject, deleteCollaborator, deleteProject, getProject, getProjects, getTasksProject, updateProject } from '../controllers';
+import { addCollaborator, createProject, deleteCollaborator, deleteProject, getProject, getProjects, updateProject } from '../controllers';
 import { checkSesion } from '../middlewares';
 
 const router = Router();
@@ -15,7 +15,6 @@ router.route( '/:id' )
   .put( updateProject )
   .delete( deleteProject );
 
-router.get( '/task', getTasksProject );
 router.post( '/add-colaborator/:id', addCollaborator );
 router.post( '/delete-colaborator/:id', deleteCollaborator );
 
