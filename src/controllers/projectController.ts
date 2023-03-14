@@ -1,7 +1,7 @@
 import { Request, Response } from "express"
 import { errorHttp } from "../helpers"
 import { UserResquestProvider } from "../interfaces"
-import { projectModel } from "../models"
+import { projectModel, taskModel } from "../models"
 
 const getProjects = async ( { user }: UserResquestProvider, res: Response) => {
   try {
@@ -25,9 +25,12 @@ const getProject = async ( { params, user }: UserResquestProvider, res: Response
 
     if ( project?.owner.toString() !== user?._id.toString() ) return res.status(403).json({ ok: false, msg: 'No autorizado' });
 
+    const tasks = await taskModel.find().where('project').equals( project.id ).sort({ createdAt: -1 });
+
     return res.status(200).json({
       ok: true,
-      project
+      project,
+      tasks,
     })
   } catch (error) {
     return errorHttp( res, 'Error del sistema, comuniquese con el administrador');
