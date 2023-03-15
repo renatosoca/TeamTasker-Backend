@@ -4,19 +4,23 @@ import { UserResquestProvider } from '../interfaces';
 import { userModel } from '../models';
 
 export const checkSesion = async ( req: UserResquestProvider, res: Response, next: NextFunction ) => {
-  const token: string = req.header('x-token') || '';
-  if ( !token ) return res.status(401).json({ ok: false, message: 'No hay un token en la petición' });
+  let token: string | undefined;
 
-  try {
-    const { _id } = verifyJWT( token );
-    if ( !_id ) return  res.status(401).json({ ok: false, message: 'Por favor, proporcione un token válido' });
+  if ( req.headers.authorization && req.headers.authorization.startsWith('Bearer') ) {
+    try {
+      token = req.headers.authorization.split(' ')[1];
 
-    req.user = await userModel.findById( _id ).select('-password -token -confirmed -createdAt -updatedAt -__v') ?? undefined;
- 
-    if( !req.user ) return res.status(404).json({ ok: false, message: 'User not found' });
+      const payload = verifyJWT(token);
 
-    return next();
-  } catch (error) {
-    return res.status(401).json({ ok: false, message: 'Sesión inválida' });
+      req.user = await userModel.findById(payload._id).select('-password -token -confirmed -createdAt -updatedAt -__v') ?? undefined;
+      if ( !req.user) return res.status(404).json({ ok: false, msg: 'Usuario no encontrado'});
+
+      return next();
+    } catch (error) {
+      return res.status(401).json({ ok: false, msg: 'Token no valido' });
+    }
   }
+
+  if ( !token ) return res.status(401).json({ ok: false, msg: 'No hay token en la peticion' });
+  next();
 }
