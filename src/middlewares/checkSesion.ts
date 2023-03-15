@@ -22,5 +22,6 @@ export const checkSesion = async ( req: UserResquestProvider, res: Response, nex
   }
 
   if ( !token ) return res.status(401).json({ ok: false, msg: 'No hay token en la peticion' });
-  next();
+
+  return next();
 }
