@@ -1,6 +1,6 @@
 import { Response, Request } from 'express';
 import { userModel } from '../models';
-import { comparePassword, errorHttp, generateJWT, generateToken, hashPassword } from '../helpers';
+import { comparePassword, emailForgotPassword, emailRegister, errorHttp, generateJWT, generateToken, hashPassword } from '../helpers';
 import { UserResquestProvider } from '../interfaces';
 
 const authUser = async ( { body }: Request, res: Response )  => {
@@ -35,8 +35,8 @@ const registerUser = async ( { body }: Request, res: Response ) => {
     const user = new userModel( body );
     user.password = hashPassword( password );
     const userCreated = await user.save();
-    console.log(userCreated);
-    //Enviar email
+    
+    emailRegister( userCreated.email, userCreated.name, userCreated.lastname, userCreated.token);
     
     return res.status(201).json({ 
       ok: true, 
@@ -77,14 +77,13 @@ const forgotPassword = async ( req: Request, res: Response ) => {
     if ( !user.confirmed ) return res.status(401).json({ ok: false, msg: 'Falta confirmar su correo electronico' });
 
     user.token = generateToken();
-    //Guardar usuario
-    await user.save();
+    const userSaved = await user.save();
 
-    //Enviar Email
+    emailForgotPassword( userSaved.email, userSaved.name, userSaved.lastname, userSaved.token);
 
     return res.status(201).json({
       ok: true,
-      msg: 'Hemos enviado las instrucciones a su correo electrónico'
+      msg: 'Consulta el correo electrónico para ver el enlace de restablecimiento de la contraseña.'
     });
   } catch (error) {
     return errorHttp( res, 'Error del sistema, comuniquese con el administrador' );
@@ -94,18 +93,21 @@ const forgotPassword = async ( req: Request, res: Response ) => {
 const resetPassword = async ( { params, body }: Request, res: Response ) => {
   const { token } = params;
   const { password } = body;
-
+  
   try {
     const user = await userModel.findOne({ token });
     if ( !user ) return res.status(401).json({ ok: false, msg: 'Token no válido o expirado'});
     if ( !user.confirmed ) return res.status(401).json({ ok: false, msg: 'Falta confirmar su correo electronico' });
-
+    console.log(user, 'user')
     user.token = '';
     user.password = hashPassword( password );
-    await user.save();
+    const userSaved = await user.save();
 
+    const { _id, name, lastname, email } = userSaved;
     return res.status(201).json({
       ok: true,
+      jwt: generateJWT( _id, email ),
+      user: { _id, name, lastname, email },
       msg: 'Contraseña actualizado correctamente'
     });
   } catch (error) {
@@ -113,6 +115,7 @@ const resetPassword = async ( { params, body }: Request, res: Response ) => {
   }
 }
 
+//Private
 //const userProfile = async ( _req: Request, res: Response ) => { }
 
 const updateUserProfile = async ( { params, body, user }: UserResquestProvider, res: Response ) => {
