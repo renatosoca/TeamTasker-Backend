@@ -1,7 +1,7 @@
-import { Request, Response } from "express"
-import { errorHttp } from "../helpers"
-import { UserResquestProvider } from "../interfaces"
-import { projectModel, taskModel } from "../models"
+import { Request, Response } from 'express'
+import { errorHttp } from '../helpers'
+import { UserResquestProvider } from '../interfaces'
+import { projectModel } from '../models'
 
 const getProjects = async ( { user }: UserResquestProvider, res: Response) => {
   try {
@@ -20,17 +20,14 @@ const getProject = async ( { params, user }: UserResquestProvider, res: Response
   const { id } = params;
 
   try {
-    const project = await projectModel.findById( id );
+    const project = await projectModel.findById( id ).populate( 'boards');
     if ( !project ) return res.status(404).json({ ok: false, msg: 'No existe el proyecto' });
 
     if ( project?.owner.toString() !== user?._id.toString() ) return res.status(403).json({ ok: false, msg: 'No autorizado' });
 
-    const tasks = await taskModel.find().where('project').equals( project.id ).sort({ createdAt: -1 });
-
     return res.status(200).json({
       ok: true,
       project,
-      tasks,
     })
   } catch (error) {
     return errorHttp( res, 'Error del sistema, comuniquese con el administrador');
@@ -40,12 +37,12 @@ const getProject = async ( { params, user }: UserResquestProvider, res: Response
 const createProject = async ( { body, user }: UserResquestProvider, res: Response ) => {
   try {
     const project = new projectModel( body );
-    project.owner = user?.id
+    project.owner = user?.id;
 
     const newProject = await project.save();
 
     return res.status( 201 ).json({
-      ok: false,
+      ok: true,
       project: newProject,
       msg: 'Proyecto creado correctamente.'
     })
@@ -54,7 +51,7 @@ const createProject = async ( { body, user }: UserResquestProvider, res: Respons
   }
 }
 
-const updateProject = async ( { params, body, user}: UserResquestProvider, res: Response ) => {
+const updateProject = async ( { params, body, user }: UserResquestProvider, res: Response ) => {
   const { id } = params;
 
   try {

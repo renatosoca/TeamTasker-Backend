@@ -1,12 +1,11 @@
 import { Document, ObjectId } from 'mongoose';
-import { User } from './user.interface';
 
 export interface Project extends Document {
   _id: ObjectId | string;
   name: string;
   description: string,
-  creationDate: Date;
-  client: string;
-  owner: ObjectId | User | string;
-  colaborators: ( ObjectId | User | string )[];
+  type: string;
+  owner: ObjectId | string;
+  boards: ( ObjectId | string )[];
+  colaborators: ( ObjectId | string )[];
 }

@@ -11,11 +11,7 @@ const projectSchema = new Schema<Project>({
     type: String,
     trim: true,
   },
-  creationDate: {
-    type: Date,
-    default: Date.now(),
-  },
-  client : {
+  type : {
     type: String,
     required: true,
     trim: true,
@@ -25,10 +21,14 @@ const projectSchema = new Schema<Project>({
     ref: 'User',
     required: true,
   },
+  boards: [{
+    type: Schema.Types.ObjectId,
+    ref: 'Board',
+  }],
   colaborators: [{
     type: Schema.Types.ObjectId,
     ref: 'User',
-  }]
+  }],
 }, { timestamps: true, versionKey: false });
 
 export default model<Project>( 'Project', projectSchema );
