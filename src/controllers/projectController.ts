@@ -5,7 +5,7 @@ import { projectModel } from '../models'
 
 const getProjects = async ( { user }: UserResquestProvider, res: Response) => {
   try {
-    const projects = await projectModel.find().where('owner').equals(user?._id).populate('owner', 'name lastname email').sort({ createdAt: -1 });
+    const projects = await projectModel.find().where('owner').equals(user?._id).populate('owner', 'name lastname email').populate('boards').sort({ createdAt: -1 });
 
     return res.status(200).json({
       ok: true,
