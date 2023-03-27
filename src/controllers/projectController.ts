@@ -1,7 +1,7 @@
 import { Request, Response } from 'express'
 import { errorHttp } from '../helpers'
 import { UserResquestProvider } from '../interfaces'
-import { projectModel } from '../models'
+import { projectModel, userModel } from '../models'
 
 const getProjects = async ( { user }: UserResquestProvider, res: Response) => {
   try {
@@ -18,12 +18,12 @@ const getProjects = async ( { user }: UserResquestProvider, res: Response) => {
 
 const getProject = async ( { params, user }: UserResquestProvider, res: Response ) => {
   const { id } = params;
-
+  
   try {
-    const project = await projectModel.findById( id ).populate( 'boards');
+    const project = await projectModel.findById( id ).populate('boards').populate('collaborators');
     if ( !project ) return res.status(404).json({ ok: false, msg: 'No existe el proyecto' });
-
-    if ( project?.owner.toString() !== user?._id.toString() ) return res.status(403).json({ ok: false, msg: 'No autorizado' });
+    
+    if ( project?.owner.toString() !== user?._id.toString() ) return res.status(403).json({ ok: false, msg: 'No autorizado para esta acción' });
 
     return res.status(200).json({
       ok: true,
@@ -92,6 +92,22 @@ const deleteProject = async ( { params, user }: UserResquestProvider, res: Respo
   }
 }
 
+const searchCollaborator = async ( { body }: UserResquestProvider, res: Response ) => {
+  const { username } = body;
+  
+  try {
+    const users = await userModel.find({ $or: [{ username: { $regex: username, $options: "i" }}] });
+    if ( !users ) return res.status(404).json({ ok: false, msg: 'No existen usuarios con ese nombre o email' });
+
+    return res.status(200).json({
+      ok: true,
+      users,
+    })
+  } catch (error) {
+    return errorHttp( res, 'Error del sistema, comuniquese con el administrador');
+  }
+}
+
 const addCollaborator = (_req: Request ) => {
 
 }
@@ -105,6 +121,7 @@ export {
   createProject,
   updateProject,
   deleteProject,
+  searchCollaborator,
   addCollaborator,
   deleteCollaborator,
 }

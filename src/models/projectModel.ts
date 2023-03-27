@@ -25,7 +25,7 @@ const projectSchema = new Schema<Project>({
     type: Schema.Types.ObjectId,
     ref: 'Board',
   }],
-  colaborators: [{
+  collaborators: [{
     type: Schema.Types.ObjectId,
     ref: 'User',
   }],

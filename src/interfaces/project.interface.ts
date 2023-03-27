@@ -7,5 +7,5 @@ export interface Project extends Document {
   type: string;
   owner: ObjectId | string;
   boards: ( ObjectId | string )[];
-  colaborators: ( ObjectId | string )[];
+  collaborators: ( ObjectId | string )[];
 }

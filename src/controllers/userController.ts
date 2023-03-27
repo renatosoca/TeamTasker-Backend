@@ -26,12 +26,15 @@ const authUser = async ( { body }: Request, res: Response )  => {
 }
 
 const registerUser = async ( { body }: Request, res: Response ) => {
-  const { email, password } = body;
+  const { email, password, username } = body;
 
   try {
-    const userExist = await userModel.findOne({ email });
-    if ( userExist ) return res.status(400).json({ ok: false, msg: 'Correo electrónico ya en uso' });
+    const usernameExist = await userModel.findOne({ username });
+    if ( usernameExist ) return res.status(400).json({ ok: false, msg: 'Nombre de usuario no disponible' });
 
+    const emailExist = await userModel.findOne({ email });
+    if ( emailExist ) return res.status(400).json({ ok: false, msg: 'Correo electrónico no disponible' });
+    
     const user = new userModel( body );
     user.password = hashPassword( password );
     const userCreated = await user.save();
