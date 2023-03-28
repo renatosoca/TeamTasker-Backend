@@ -14,10 +14,10 @@ const authUser = async ( { body }: Request, res: Response )  => {
     const validPassword = comparePassword( password, user.password );
     if ( !validPassword ) return res.status(401).json({ ok: false, msg: 'Correo o contraseña incorrecto' });
 
-    const { _id, name, lastname } = user;
+    const { _id, name, lastname, username } = user;
     return res.status(202).json({
       ok: true,
-      user: { _id, name, lastname, email },
+      user: { _id, name, lastname, username, email },
       jwt: generateJWT( _id, email ),
     });
   } catch (error) {
@@ -106,11 +106,11 @@ const resetPassword = async ( { params, body }: Request, res: Response ) => {
     user.password = hashPassword( password );
     const userSaved = await user.save();
 
-    const { _id, name, lastname, email } = userSaved;
+    const { _id, name, lastname, username, email } = userSaved;
     return res.status(201).json({
       ok: true,
       jwt: generateJWT( _id, email ),
-      user: { _id, name, lastname, email },
+      user: { _id, name, lastname, username, email },
       msg: 'Contraseña actualizado correctamente'
     });
   } catch (error) {
@@ -176,6 +176,7 @@ const updateUserPassword = async ( { params, body, user }: UserResquestProvider,
 }
 
 const revalidateJWT = async ( { user }: UserResquestProvider, res: Response ) => {
+  console.log(user)
   try {
     return res.status(200).json({
       ok: true,
