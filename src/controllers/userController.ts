@@ -176,7 +176,6 @@ const updateUserPassword = async ( { params, body, user }: UserResquestProvider,
 }
 
 const revalidateJWT = async ( { user }: UserResquestProvider, res: Response ) => {
-  console.log(user)
   try {
     return res.status(200).json({
       ok: true,
