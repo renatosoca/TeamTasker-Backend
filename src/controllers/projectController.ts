@@ -5,7 +5,7 @@ import { projectModel, userModel } from '../models'
 
 const getProjects = async ( { user }: UserResquestProvider, res: Response) => {
   try {
-    const projects = await projectModel.find().where('owner').equals(user?._id).populate('owner', '_id name lastname username email').populate('boards').populate('collaborators', '_id name lastname username email').sort({ createdAt: -1 });
+    const projects = await projectModel.find({ $or: [{ 'collaborators': {$in: user}}, { 'owner': {$in: user}}] }).populate('owner', '_id name lastname username email').populate('boards').populate('collaborators', '_id name lastname username email').sort({ createdAt: -1 });
 
     return res.status(200).json({
       ok: true,
@@ -23,7 +23,7 @@ const getProject = async ( { params, user }: UserResquestProvider, res: Response
     const project = await projectModel.findById( id ).populate('boards').populate('collaborators', '_id name lastname username email').populate('owner', '_id name lastname username email');
     if ( !project ) return res.status(404).json({ ok: false, msg: 'No existe el proyecto' });
     
-    if ( project?.owner._id.toString() !== user?._id.toString() ) return res.status(403).json({ ok: false, msg: 'No autorizado para esta acción' });
+    if ( (project?.owner._id.toString() !== user?._id.toString()) && !project.collaborators.some( collaborator => collaborator._id.toString() === user?._id.toString() ) ) return res.status(403).json({ ok: false, msg: 'No autorizado para esta acción' });
 
     return res.status(200).json({
       ok: true,
