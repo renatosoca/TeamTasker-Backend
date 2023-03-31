@@ -1,7 +1,7 @@
 import { Response } from 'express'
 import { errorHttp } from '../helpers'
 import { UserResquestProvider } from '../interfaces'
-import { projectModel, userModel } from '../models'
+import { boardModel, projectModel, userModel } from '../models'
 
 const getProjects = async ( { user }: UserResquestProvider, res: Response) => {
   try {
@@ -83,6 +83,7 @@ const deleteProject = async ( { params, user }: UserResquestProvider, res: Respo
     if ( project?.owner.toString() !== user?._id.toString() ) return res.status(403).json({ ok: false, msg: 'No autorizado' });
     
     await project.deleteOne();
+    await boardModel.deleteMany({ project: id });
     
     return res.status(200).json({
       ok: true,
