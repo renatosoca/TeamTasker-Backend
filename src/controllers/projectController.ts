@@ -1,11 +1,12 @@
-import { Response } from 'express'
-import { errorHttp } from '../helpers'
-import { UserResquestProvider } from '../interfaces'
-import { boardModel, projectModel, userModel } from '../models'
+import { Response } from 'express';
+import { errorHttp } from '../helpers';
+import { UserResquestProvider } from '../interfaces';
+import { boardModel, projectModel, userModel } from '../models';
 
 const getProjects = async ( { user }: UserResquestProvider, res: Response) => {
   try {
-    const projects = await projectModel.find({ $or: [{ 'collaborators': {$in: user}}, { 'owner': {$in: user}}] }).populate('owner', '_id name lastname username email').populate('boards').populate('collaborators', '_id name lastname username email').sort({ createdAt: -1 });
+    const projects = await projectModel.find({ $or: [{ 'collaborators': {$in: user}}, { 'owner': {$in: user}}] })
+      .populate('owner', '_id name lastname username email').populate('boards', '-createdAt -updatedAt').populate('collaborators', '_id name lastname username email').sort({ createdAt: -1 });
 
     return res.status(200).json({
       ok: true,
@@ -20,10 +21,11 @@ const getProject = async ( { params, user }: UserResquestProvider, res: Response
   const { id } = params;
   
   try {
-    const project = await projectModel.findById( id ).populate('boards').populate('collaborators', '_id name lastname username email').populate('owner', '_id name lastname username email');
+    const project = await projectModel.findById( id ).populate('boards', '-createdAt -updatedAt').populate('collaborators', '_id name lastname username email').populate('owner', '_id name lastname username email');
     if ( !project ) return res.status(404).json({ ok: false, msg: 'No existe el proyecto' });
     
-    if ( (project?.owner._id.toString() !== user?._id.toString()) && !project.collaborators.some( collaborator => collaborator._id.toString() === user?._id.toString() ) ) return res.status(403).json({ ok: false, msg: 'No autorizado para esta acción' });
+    const isAuthorized = project.owner._id.toString() !== user?._id.toString() && !project.collaborators.some( collaborator => collaborator._id.toString() === user?._id.toString() );
+    if ( isAuthorized ) return res.status(403).json({ ok: false, msg: 'No autorizado para esta acción' });
 
     return res.status(200).json({
       ok: true,
@@ -110,17 +112,18 @@ const searchCollaborator = async ( { body }: UserResquestProvider, res: Response
   }
 }
 
-const addCollaborator = async ( { params, body }: UserResquestProvider, res: Response ) => {
+const addCollaborator = async ( { params, body, user }: UserResquestProvider, res: Response ) => {
   const { id } = params;
   const { collaboratorId } = body;
   
   try {
-    const project = await projectModel.findById( id ).populate('boards').populate('collaborators', '_id name lastname username email').populate('owner', '_id name lastname username email');
+    const project = await projectModel.findById(id).populate('boards').populate('collaborators', '_id name lastname username email').populate('owner', '_id name lastname username email');
     if ( !project ) return res.status(404).json({ ok: false, msg: 'No existe el proyecto' });
 
     const userExist = await userModel.findById( collaboratorId ).select('-password -token -confirmed -createdAt -updatedAt -__v');
     if ( !userExist ) return res.status(404).json({ ok: false, msg: 'No existe el usuario' });
     
+    if ( project.owner._id.toString() !== user?._id.toString() ) return res.status(403).json({ ok: false, msg: 'No autorizado' });
     if ( project.owner._id.toString() === userExist._id.toString() ) return res.status(403).json({ ok: false, msg: 'El administrador no puede ser colaborador' });
 
     const isCollaborator = project.collaborators.some(collaborator => collaborator._id.toString() === userExist._id.toString());
@@ -152,11 +155,10 @@ const deleteCollaborator = async ( { params, body, user }: UserResquestProvider,
 
     project.collaborators = project.collaborators.filter(collaborator => collaborator._id.toString() !== collaboratorId.toString());
 
-    const savedProject = await project.save();
+    await project.save();
     
     return res.status(200).json({
       ok: true,
-      project: savedProject,
       msg: 'Colaborador eliminado correctamente.'
     })
   } catch (error) {

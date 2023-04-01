@@ -3,6 +3,29 @@ import { errorHttp } from "../helpers";
 import { UserResquestProvider } from "../interfaces";
 import { projectModel, taskModel, boardModel } from "../models";
 
+const getBoard = async ( { params, user }: UserResquestProvider, res: Response ) => {
+  const { id } = params;
+
+  try {
+    const board = await boardModel.findById( id ).populate('project', '-createdAt -updatedAt').populate('tasks');
+    if ( !board ) return res.status(404).json({ ok: false, msg: 'No existe el tablero' });
+
+    const project = await projectModel.findById( board.project._id ).populate('owner', '_id name lastname username email').populate('boards', '-createdAt -updatedAt').populate('collaborators', '_id name lastname username email');
+    if ( !project ) return res.status(404).json({ ok: false, msg: 'No existe un proyecto asociado a este tablero' });
+
+    const isAuthorized = project.owner._id.toString() !== user?._id.toString() && !project.collaborators.some( collaborator => collaborator._id.toString() === user?._id.toString() );
+    if ( isAuthorized ) return res.status(403).json({ ok: false, msg: 'No autorizado para esta acción' });
+
+    return res.status(202).json({
+      ok: true,
+      board,
+      project,
+    })
+  } catch (error) {
+    return errorHttp( res, 'Error al obtener la tarea');
+  }
+}
+
 const createBoard = async ( { body, user }: UserResquestProvider, res: Response ) => {
   const { project: proyectId } = body;
   
@@ -24,24 +47,6 @@ const createBoard = async ( { body, user }: UserResquestProvider, res: Response 
     })
   } catch (error) {
     return errorHttp( res, 'Error al crear la tarea');
-  }
-}
-
-const getBoard = async ( { params, user }: UserResquestProvider, res: Response ) => {
-  const { id } = params;
-
-  try {
-    const task = await taskModel.findById( id ).populate('project');
-    if ( !task ) return res.status(404).json({ ok: false, msg: 'No existe la tarea' });
-
-    if ( task.project.owner.toString() !== user?._id.toString() ) return res.status(403).json({ ok: false, msg: 'No autorizado para esta acción' });
-
-    return res.status(202).json({
-      ok: true,
-      task,
-    })
-  } catch (error) {
-    return errorHttp( res, 'Error al obtener la tarea');
   }
 }
 

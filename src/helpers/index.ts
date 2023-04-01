@@ -1,3 +1,4 @@
+export * from './auth.handle';
 export * from './bcrypt.handle';
 export * from './emails.handle';
 export * from './error.handle';
