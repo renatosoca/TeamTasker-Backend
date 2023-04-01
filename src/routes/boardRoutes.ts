@@ -6,7 +6,7 @@ const router = Router();
 
 router.use( checkSesion );
 
-router.get( '/:id', getBoard );
+router.get( '/:boardId', getBoard );
 router.route('/').post( createBoard );
 
 export default router;
