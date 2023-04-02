@@ -61,9 +61,11 @@ const updateProject = async ( { params, body, user }: UserResquestProvider, res:
     const project = await projectModel.findById( id );
     if ( !project ) return res.status(404).json({ ok: false, msg: 'No existe el proyecto' });
 
-    if ( project?.owner.toString() !== user?._id.toString() ) return res.status(403).json({ ok: false, msg: 'No autorizado' });
+    if ( project?.owner._id.toString() !== user?._id.toString() ) return res.status(403).json({ ok: false, msg: 'No autorizado' });
     
-    const newProject = await projectModel.findByIdAndUpdate( id, { ...body }, { new: true } );
+    await projectModel.findByIdAndUpdate( id, { ...body }, { new: true } );
+
+    const newProject = await projectModel.findById( id ).populate('boards').populate('collaborators', '-createdAt -updatedAt').populate('owner', '_id name lastname username email');
     
     return res.status(200).json({
       ok: true,
