@@ -4,6 +4,7 @@ import { UserResquestProvider } from "../interfaces";
 import { projectModel, taskModel, boardModel } from "../models";
 
 const getBoard = async ( { params, user }: UserResquestProvider, res: Response ) => {
+  if (!user) return res.status(401).json({ ok: false, msg: 'Sin autorización' });
   const { boardId } = params;
 
   try {

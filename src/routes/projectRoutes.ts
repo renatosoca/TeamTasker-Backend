@@ -4,19 +4,19 @@ import { checkSesion } from '../middlewares';
 
 const router = Router();
 
-router.use( checkSesion );
+router.use(checkSesion);
 
-router.route( '/' )
-  .get( getProjects)
-  .post( createProject );
+router.route('/')
+  .get(getProjects)
+  .post(createProject);
 
-router.route( '/:id' )
-  .get( getProject )
-  .put( updateProject )
-  .delete( deleteProject );
+router.route('/:id')
+  .get(getProject)
+  .put(updateProject)
+  .delete(deleteProject);
 
-router.post( '/search-collaborator', searchCollaborator );
-router.post( '/add-collaborator/:id', addCollaborator );
-router.post( '/delete-collaborator/:id', deleteCollaborator );
+router.post('/search-collaborator', searchCollaborator);
+router.post('/add-collaborator/:id', addCollaborator);
+router.post('/delete-collaborator/:id', deleteCollaborator);
 
 export default router;
